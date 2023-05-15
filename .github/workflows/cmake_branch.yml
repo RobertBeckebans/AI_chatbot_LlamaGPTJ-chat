@@ -21,8 +21,8 @@ jobs:
           - { os: 'ubuntu-latest', instructions: 'avx2' }
           - { os: 'macos-latest', instructions: 'avx' }
           - { os: 'macos-latest', instructions: 'avx2' }
-          - { os: 'windows-latest', build: 'regular', instructions: 'avx' }
-          - { os: 'windows-latest', build: 'regular', instructions: 'avx2' }
+          - { os: 'windows-latest', build: 'msvc', instructions: 'avx' }
+          - { os: 'windows-latest', build: 'msvc', instructions: 'avx2' }
           - { os: 'windows-latest', build: 'mingw', instructions: 'avx' }
           - { os: 'windows-latest', build: 'mingw', instructions: 'avx2' }
 
