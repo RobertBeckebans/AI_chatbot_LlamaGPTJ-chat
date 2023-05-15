@@ -19,7 +19,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
+          - { os: 'windows-latest', build: 'msvc' }
+          - { os: 'windows-latest', build: 'mingw' }
         instructions:
           - avx
           - avx2
@@ -30,23 +31,24 @@ jobs:
           submodules: recursive
 
     - name: Configure CMake
+      if: matrix.build == 'msvc'
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
+      if: matrix.build == 'msvc'
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Test
+      if: matrix.build == 'msvc'
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Prepare binary
+      if: matrix.build == 'msvc'
       run: |
         if ("${{ matrix.os }}" -eq "windows-latest") {
-          cp ${{github.workspace}}\build\bin\Release\chat.exe chat.exe
-          mv chat.exe chat-windows-latest.exe
-        } else {
-          cp ${{github.workspace}}/build/bin/chat chat
-          mv chat chat-${{ matrix.os }}
+          cp ${{github.workspace}}\build\bin\Release\chat.exe chat-msvc.exe
+          mv chat-msvc.exe chat-windows-latest-msvc.exe
         }
       shell: pwsh
       
