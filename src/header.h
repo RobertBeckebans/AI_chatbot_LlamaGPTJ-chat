@@ -7,8 +7,7 @@
 
 #include <cstdio>
 
-//Switch to MinGW compilation.
-#include <unistd.h>
+
 #include <cassert>
 #include <cmath>
 #include <string>
@@ -23,12 +22,19 @@
 #include <cstring>
 #include <functional>
 
-//For Windows paths
-//Commented out to support really old xcode
+//For Windows compilation 
 #ifdef _WIN32
     #include <filesystem>
+    #define WIN32_LEAN_AND_MEAN
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #include <windows.h>
+    #include <io.h>
+    #include <stdio.h> // for _fseeki64
+#else
+	#include <unistd.h>
 #endif
-
 
 #include <typeinfo>
 #include <future>
