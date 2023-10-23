@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 #if(APPLE)
-#  option(BUILD_UNIVERSAL "Build a Universal binary on macOS" OFF)
+#  option(BUILD_UNIVERSAL "Build a Universal binary on macOS" ON)
 #  if(BUILD_UNIVERSAL)
 #    # Build a Universal binary on macOS
 #    # This requires that the found Qt library is compiled as Universal binaries.
@@ -17,7 +18,7 @@ cmake_minimum_required(VERSION 3.16)
 
 #set(LLMODEL_VERSION_MAJOR 0)
 #set(LLMODEL_VERSION_MINOR 1)
-#set(LLMODEL_VERSION_PATCH 0)
+#set(LLMODEL_VERSION_PATCH 1)
 #set(LLMODEL_VERSION "${LLMODEL_VERSION_MAJOR}.${LLMODEL_VERSION_MINOR}.${LLMODEL_VERSION_PATCH}")
 #project(llmodel VERSION ${LLMODEL_VERSION} LANGUAGES CXX C)
 

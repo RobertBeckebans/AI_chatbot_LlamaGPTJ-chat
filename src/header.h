@@ -7,7 +7,6 @@
 
 #include <cstdio>
 
-
 #include <cassert>
 #include <cmath>
 #include <string>
@@ -21,20 +20,27 @@
 #include <regex>
 #include <cstring>
 #include <functional>
+#include <csignal>
 
-//For Windows compilation 
-#ifdef _WIN32
+//For paths
+//Commented out to support really old xcode
+#ifndef OLD_MACOS
     #include <filesystem>
+#endif
+
+//For Windows MSVC compilation
+#if defined(_WIN32) && defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
     #ifndef NOMINMAX
         #define NOMINMAX
     #endif
     #include <windows.h>
     #include <io.h>
-    #include <stdio.h> // for _fseeki64
+    #include <stdio.h>
 #else
-	#include <unistd.h>
+    #include <unistd.h>
 #endif
+
 
 #include <typeinfo>
 #include <future>
@@ -75,13 +81,25 @@ struct chatParams {
         int32_t n_threads = std::min(4, (int32_t)std::thread::hardware_concurrency()); 
         std::string model = "./models/ggml-vicuna-13b-1.1-q4_2.bin";
         std::string prompt = "";
+        //template prefix, header, and footer
+        std::string default_prefix = "### Instruction:\n The prompt below is a question to answer, a task to complete, or a conversation to respond to; decide which and write an appropriate response.";
+        std::string default_header = "\n### Prompt: ";
+        std::string default_footer = "\n### Response: ";
         //You can toggle chat interactivity with these parameters
         bool no_interactive = false;
         bool use_animation = true;
         bool run_once = false;
+        bool no_saves = false;
+        std::string b_token = "";           //beginning wrap token
+        std::string e_token = "";           //ending wrap token
         std::string load_template = "";     //template file location
         std::string load_json = "";         //json file location
-
+        std::string save_log = "";          //saved chat log file location
+        std::string load_log = "";          //loaded chat log file location
+        std::string save_name = "model_state";  //model state binary name
+        std::string save_dir  = "";         //saves directory name
+        //program binary path
+        std::string path = "";
 };
 
 enum ConsoleColor {

@@ -79,16 +79,29 @@ void get_params_from_json(chatParams& params) {
         params.run_once = stob(removeQuotes(parsed["run-once"]));        
     if (parsed.find("no-animation") != parsed.end())
         params.use_animation = !stob(removeQuotes(parsed["no-animation"]));
-        
+    if (parsed.find("no-saves") != parsed.end())
+        params.no_saves = stob(removeQuotes(parsed["no-saves"]));
+
     if (parsed.find("repeat_penalty") != parsed.end())
         params.repeat_penalty = std::stof(parsed["repeat_penalty"]);
     if (parsed.find("repeat_last_n") != parsed.end())
         params.repeat_last_n = std::stoi(parsed["repeat_last_n"]);
     if (parsed.find("context_erase") != parsed.end())
-        params.context_erase = std::stof(parsed["context_erase"]);        
+        params.context_erase = std::stof(parsed["context_erase"]);
+    if (parsed.find("b_token") != parsed.end())
+        params.b_token = removeQuotes(parsed["b_token"]);
+    if (parsed.find("e_token") != parsed.end())
+        params.e_token = removeQuotes(parsed["e_token"]);              
     if (parsed.find("load_template") != parsed.end())
-        params.load_template = removeQuotes(parsed["load_template"]);    
-}
+        params.load_template = removeQuotes(parsed["load_template"]);   
+    if (parsed.find("save_log") != parsed.end())
+        params.save_log = removeQuotes(parsed["save_log"]);
+    if (parsed.find("load_log") != parsed.end())
+        params.load_log = removeQuotes(parsed["load_log"]);
+    if (parsed.find("save_dir") != parsed.end())
+        params.save_dir = removeQuotes(parsed["save_dir"]);
+    if (parsed.find("save_name") != parsed.end())
+        params.save_name = removeQuotes(parsed["save_name"]);}
 
 
 #endif

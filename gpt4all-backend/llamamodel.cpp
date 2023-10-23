@@ -13,16 +13,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
     #ifndef NOMINMAX
         #define NOMINMAX
     #endif
     #include <windows.h>
     #include <io.h>
-    #include <stdio.h> // for _fseeki64
+    #include <stdio.h>
 #else
-	#include <unistd.h>
+    #include <unistd.h>
 #endif
 #include <random>
 #include <thread>
@@ -53,7 +53,11 @@ bool LLamaModel::loadModel(const std::string &modelPath)
     d_ptr->params.seed       = params.seed;
     d_ptr->params.f16_kv     = params.memory_f16;
     d_ptr->params.use_mmap   = params.use_mmap;
+#if defined (__APPLE__)
+    d_ptr->params.use_mlock  = true;
+#else
     d_ptr->params.use_mlock  = params.use_mlock;
+#endif
 
     d_ptr->ctx = llama_init_from_file(modelPath.c_str(), d_ptr->params);
     if (!d_ptr->ctx) {
@@ -71,7 +75,8 @@ void LLamaModel::setThreadCount(int32_t n_threads) {
     d_ptr->n_threads = n_threads;
 }
 
-int32_t LLamaModel::threadCount() {
+int32_t LLamaModel::threadCount() const
+{
     return d_ptr->n_threads;
 }
 
@@ -174,15 +179,16 @@ void LLamaModel::prompt(const std::string &prompt,
     std::string cachedResponse;
     std::vector<llama_token> cachedTokens;
     std::unordered_set<std::string> reversePrompts
-        = { "### Instruction", "### Prompt", "### Response", "### Human", "### Assistant" };
+        = { "### Instruction", "### Prompt", "### Response", "### Human", "### Assistant", "### Context" };
 
     // predict next tokens
     int32_t totalPredictions = 0;
     for (int i = 0; i < promptCtx.n_predict; i++) {
         // sample next token
+        const size_t n_prev_toks = std::min((size_t) promptCtx.repeat_last_n, promptCtx.tokens.size());
         llama_token id = llama_sample_top_p_top_k(d_ptr->ctx,
-            promptCtx.tokens.data() + promptCtx.n_ctx - promptCtx.repeat_last_n,
-            promptCtx.repeat_last_n, promptCtx.top_k, promptCtx.top_p, promptCtx.temp,
+            promptCtx.tokens.data() + promptCtx.tokens.size() - n_prev_toks,
+            n_prev_toks, promptCtx.top_k, promptCtx.top_p, promptCtx.temp,
             promptCtx.repeat_penalty);
 
         // Check if the context has run out...

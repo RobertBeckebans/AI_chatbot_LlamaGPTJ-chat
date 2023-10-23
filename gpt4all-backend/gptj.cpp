@@ -12,16 +12,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
     #define WIN32_LEAN_AND_MEAN
     #ifndef NOMINMAX
         #define NOMINMAX
     #endif
     #include <windows.h>
     #include <io.h>
-    #include <stdio.h> // for _fseeki64
+    #include <stdio.h>
 #else
-	#include <unistd.h>
+    #include <unistd.h>
 #endif
 #include <sstream>
 #include <unordered_set>
@@ -507,9 +507,9 @@ bool gptj_eval(
 
     const int d_key = n_embd/n_head;
 
-    static size_t buf_size = 1024u*MB;
-    if (!model.buf.addr || model.buf.size < buf_size)
-        model.buf.resize(buf_size);
+    const size_t init_buf_size = 1024u*MB;
+    if (!model.buf.addr || model.buf.size < init_buf_size)
+        model.buf.resize(init_buf_size);
 
     if (mem_per_token > 0 && mem_per_token*N > model.buf.size) {
         const size_t buf_size_new = 1.1*(mem_per_token*N); // add 10% to account for ggml object overhead
@@ -867,7 +867,8 @@ void GPTJ::setThreadCount(int32_t n_threads) {
     d_ptr->n_threads = n_threads;
 }
 
-int32_t GPTJ::threadCount() {
+int32_t GPTJ::threadCount() const
+{
     return d_ptr->n_threads;
 }
 
@@ -982,7 +983,7 @@ void GPTJ::prompt(const std::string &prompt,
     std::string cachedResponse;
     std::vector<gpt_vocab::id> cachedTokens;
     std::unordered_set<std::string> reversePrompts
-        = { "### Instruction", "### Prompt", "### Response", "### Human", "### Assistant" };
+        = { "### Instruction", "### Prompt", "### Response", "### Human", "### Assistant", "### Context" };
 
     // predict next tokens
     int32_t totalPredictions = 0;
@@ -993,9 +994,10 @@ void GPTJ::prompt(const std::string &prompt,
         gpt_vocab::id id = 0;
         {
             const int64_t t_start_sample_us = ggml_time_us();
-            id = gpt_sample_top_k_top_p(d_ptr->vocab,
-                promptCtx.tokens.data() + promptCtx.n_ctx - promptCtx.n_ctx,
-                promptCtx.n_ctx,
+            const size_t n_prev_toks = std::min((size_t) promptCtx.repeat_last_n, promptCtx.tokens.size());
+            id = gpt_sample_top_k_top_p(d_ptr->vocab, n_vocab,
+                promptCtx.tokens.data() + promptCtx.tokens.size() - n_prev_toks,
+                n_prev_toks,
                 promptCtx.logits,
                 promptCtx.top_k, promptCtx.top_p, promptCtx.temp,
                 promptCtx.repeat_penalty,
